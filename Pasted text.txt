@@ -1,0 +1,573 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KALAMII - Speaking Challenge</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:16px;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#dbeafe,#fce7f3);
+  color:#172554
+}
+.container{max-width:650px;margin:auto}
+.card{
+  background:white;border-radius:24px;
+  padding:22px;margin:12px 0;
+  box-shadow:0 8px 25px #17255418
+}
+.hidden{display:none!important}
+.brand{text-align:center;color:#2563eb;font-size:32px;font-weight:900}
+.subtitle{text-align:center;color:#64748b}
+.mascot{text-align:center;font-size:65px}
+h1{text-align:center;color:#2563eb}
+h2{font-size:22px}
+button{
+  border:0;border-radius:13px;padding:13px 17px;
+  font-weight:bold;font-size:15px;cursor:pointer
+}
+.primary{background:#2563eb;color:white}
+.secondary{background:#dbeafe;color:#1e40af}
+.success{background:#dcfce7;color:#166534}
+button:disabled{opacity:.4;cursor:not-allowed}
+input{
+  width:100%;padding:13px;border:2px solid #bfdbfe;
+  border-radius:12px;margin:7px 0 15px;font-size:16px
+}
+label{font-weight:bold}
+.progress{
+  height:12px;background:#dbeafe;border-radius:20px;
+  overflow:hidden;margin:15px 0
+}
+.bar{height:100%;background:#06b6d4;width:0;transition:.4s}
+.info{display:flex;justify-content:space-between;font-weight:bold}
+.arabic{
+  text-align:center;direction:rtl;
+  font-size:34px;line-height:1.8;
+  background:#eff6ff;padding:20px;border-radius:16px;
+  margin:18px 0
+}
+.meaning{text-align:center;color:#64748b}
+.record{
+  background:#fff7ed;border:2px dashed #fdba74;
+  border-radius:17px;padding:17px;text-align:center
+}
+.answers{display:grid;gap:10px;margin:15px 0}
+.answer{
+  background:#f1f5f9;color:#172554;
+  border:2px solid #dbeafe;text-align:left
+}
+.answer.correct{background:#dcfce7;border-color:#16a34a}
+.answer.wrong{background:#fee2e2;border-color:#dc2626}
+.feedback{text-align:center;font-weight:bold;min-height:25px}
+.good{color:#15803d}.bad{color:#dc2626}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#eff6ff;padding:14px 5px;border-radius:14px;text-align:center}
+.stat b{display:block;font-size:22px;color:#2563eb}
+.stat small{color:#64748b}
+table{width:100%;border-collapse:collapse}
+td,th{padding:10px 5px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:13px}
+th{color:#64748b}
+.center{text-align:center}
+.note{font-size:12px;color:#64748b;line-height:1.5}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<!-- HALAMAN AWAL -->
+<section id="home" class="card">
+  <div class="mascot">🦭</div>
+  <div class="brand">KALAMII</div>
+  <h1>مَهَارَةُ الْكَلَامِ</h1>
+  <h2 class="center">Berani Berbicara Bahasa Arab!</h2>
+  <p class="subtitle">
+    Selesaikan 10 tantangan, rekam suaramu,
+    kumpulkan XP, bintang, dan lencana!
+  </p>
+
+  <label>Nama siswa</label>
+  <input id="nama" placeholder="Masukkan nama lengkap">
+
+  <label>Nomor absen</label>
+  <input id="absen" type="number" min="1" max="999"
+         placeholder="Masukkan nomor absen">
+
+  <button class="primary" style="width:100%"
+          onclick="mulai()">▶ MULAI BERMAIN</button>
+
+  <p class="note center">
+    Gunakan HP dengan mikrofon aktif dan izinkan akses mikrofon.
+  </p>
+
+  <button class="secondary" style="width:100%"
+          onclick="lihatPeringkat()">🏆 Lihat Leaderboard</button>
+</section>
+
+<!-- HALAMAN PERMAINAN -->
+<section id="game" class="card hidden">
+  <div class="info">
+    <span id="nomor">SOAL 1/10</span>
+    <span>⭐ <span id="xp">0</span> XP</span>
+  </div>
+
+  <div class="progress"><div id="bar" class="bar"></div></div>
+
+  <h2 id="judul" class="center"></h2>
+  <div id="arab" class="arabic"></div>
+  <p id="arti" class="meaning"></p>
+  <p id="petunjuk" class="center"></p>
+
+  <div class="center">
+    <button class="secondary" onclick="contohSuara()">
+      🔊 Dengarkan Contoh
+    </button>
+  </div>
+
+  <div class="record" style="margin-top:17px">
+    <div style="font-size:35px">🎙️</div>
+    <p id="statusRekam">Rekam suaramu untuk menyelesaikan tantangan.</p>
+
+    <button id="rekam" class="primary" onclick="mulaiRekam()">
+      ● Rekam Suara
+    </button>
+    <button id="putar" class="secondary" onclick="putarRekaman()" disabled>
+      ▶ Putar
+    </button>
+    <button id="ulang" class="secondary" onclick="rekamUlang()" disabled>
+      ↻ Rekam Ulang
+    </button>
+
+    <audio id="audio" controls class="hidden" style="width:100%;margin-top:10px"></audio>
+  </div>
+
+  <div id="kuis" class="hidden">
+    <h3 class="center">Pilih arti kalimat yang benar!</h3>
+    <div id="pilihan" class="answers"></div>
+    <p id="feedback" class="feedback"></p>
+  </div>
+
+  <button id="lanjut" class="primary" style="width:100%"
+          onclick="soalBerikutnya()" disabled>
+    LANJUT →
+  </button>
+  <p class="note center">
+    Kamu harus merekam suara dan menjawab dengan benar sebelum lanjut.
+  </p>
+</section>
+
+<!-- HASIL AKHIR -->
+<section id="hasil" class="card hidden center">
+  <div class="mascot">🏆</div>
+  <h1>HEBAT SEKALI!</h1>
+  <p id="pesanHasil"></p>
+
+  <div class="stats">
+    <div class="stat"><b id="hasilXP">0</b><small>XP</small></div>
+    <div class="stat"><b id="hasilBintang">0</b><small>Bintang</small></div>
+    <div class="stat"><b id="hasilLencana">🎖️</b><small>Lencana</small></div>
+  </div>
+
+  <p id="statusKirim" class="feedback">Mengirim hasil...</p>
+
+  <button class="primary" style="width:100%"
+          onclick="lihatPeringkat()">🏆 LIHAT PERINGKAT</button>
+  <button class="secondary" style="width:100%;margin-top:10px"
+          onclick="beranda()">Kembali ke Beranda</button>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leader" class="card hidden">
+  <h1>🏆 LEADERBOARD</h1>
+  <p class="subtitle">Peringkat siswa KALAMII</p>
+  <div id="daftarPeringkat">Memuat data...</div>
+
+  <button class="secondary" style="width:100%;margin-top:15px"
+          onclick="lihatPeringkat()">↻ Perbarui</button>
+  <button class="primary" style="width:100%;margin-top:10px"
+          onclick="beranda()">Kembali</button>
+</section>
+
+</div>
+
+<script>
+const soal = [
+{
+judul:"Salam",
+arab:"السَّلَامُ عَلَيْكُمْ",
+arti:"Semoga keselamatan tercurah kepada kalian.",
+petunjuk:"Ucapkan salam dengan jelas.",
+opsi:["Semoga keselamatan tercurah kepada kalian","Selamat malam","Sampai jumpa","Apa kabar?"],
+benar:0
+},
+{
+judul:"Menjawab Salam",
+arab:"وَعَلَيْكُمُ السَّلَامُ وَرَحْمَةُ اللهِ",
+arti:"Dan semoga keselamatan serta rahmat Allah tercurah kepada kalian.",
+petunjuk:"Ucapkan jawaban salam berikut.",
+opsi:["Selamat pagi","Dan semoga keselamatan serta rahmat Allah tercurah kepada kalian","Nama saya Ahmad","Ini teman saya"],
+benar:1
+},
+{
+judul:"Perkenalan Diri",
+arab:"أَنَا طَالِبٌ",
+arti:"Saya seorang siswa laki-laki.",
+petunjuk:"Perkenalkan dirimu menggunakan kalimat ini.",
+opsi:["Saya seorang siswi","Dia teman saya","Saya seorang siswa laki-laki","Ini Ahmad"],
+benar:2
+},
+{
+judul:"Menyebutkan Nama",
+arab:"اِسْمِي أَحْمَدُ",
+arti:"Nama saya Ahmad.",
+petunjuk:"Ucapkan kalimat perkenalan nama.",
+opsi:["Nama saya Ahmad","Nama saya Aisyah","Dia Ahmad","Ini teman saya"],
+benar:0
+},
+{
+judul:"Perkenalan Siswi",
+arab:"أَنَا طَالِبَةٌ",
+arti:"Saya seorang siswi.",
+petunjuk:"Ucapkan kalimat berikut.",
+opsi:["Saya seorang siswa","Saya seorang siswi","Dia siswi","Ini siswi"],
+benar:1
+},
+{
+judul:"Kata Ganti",
+arab:"أَنَا",
+arti:"Saya.",
+petunjuk:"Ucapkan kata ganti orang pertama.",
+opsi:["Dia laki-laki","Kamu perempuan","Saya","Dia perempuan"],
+benar:2
+},
+{
+judul:"Memperkenalkan Teman",
+arab:"هَذَا أَحْمَدُ، هُوَ صَدِيقِي",
+arti:"Ini Ahmad, dia teman laki-lakiku.",
+petunjuk:"Perkenalkan teman laki-laki.",
+opsi:["Ini Aisyah, dia temanku","Ini Ahmad, dia teman laki-lakiku","Nama saya Ahmad","Saya siswa"],
+benar:1
+},
+{
+judul:"Memperkenalkan Teman Perempuan",
+arab:"هَذِهِ عَائِشَةُ، هِيَ صَدِيقَتِي",
+arti:"Ini Aisyah, dia teman perempuanku.",
+petunjuk:"Perkenalkan teman perempuan.",
+opsi:["Ini Aisyah, dia teman perempuanku","Ini Ahmad, dia temanku","Saya siswi","Nama saya Aisyah"],
+benar:0
+},
+{
+judul:"Bertanya tentang Teman",
+arab:"مَنْ هَذَا؟",
+arti:"Siapakah ini? (untuk laki-laki)",
+petunjuk:"Ucapkan pertanyaan berikut.",
+opsi:["Siapa namamu?","Siapakah ini? (untuk laki-laki)","Di mana rumahmu?","Apa kabar?"],
+benar:1
+},
+{
+judul:"Hiwar Perkenalan",
+arab:"أَنَا طَالِبٌ، اِسْمِي فَوْزِي، مَنْ هَذَا؟",
+arti:"Saya siswa laki-laki, nama saya Fauzi. Siapakah ini?",
+petunjuk:"Ucapkan dialog singkat ini.",
+opsi:["Saya siswi, nama saya Aisyah","Ini Karim, dia temanku","Saya siswa laki-laki, nama saya Fauzi. Siapakah ini?","Selamat pagi"],
+benar:2
+}
+];
+
+let indeks=0;
+let totalXP=0;
+let bintang=0;
+let rekamSelesai=false;
+let jawabanBenar=false;
+let perekam=null;
+let potongan=[];
+let fileAudio=null;
+let streamMic=null;
+let identitas={};
+
+function tampil(id){
+  ["home","game","hasil","leader"].forEach(x=>{
+    document.getElementById(x).classList.toggle("hidden",x!==id);
+  });
+}
+
+function mulai(){
+  let nama=document.getElementById("nama").value.trim();
+  let absen=document.getElementById("absen").value.trim();
+
+  if(nama.length<2){alert("Masukkan nama lengkap!");return;}
+  if(!/^[0-9]{1,3}$/.test(absen)){alert("Masukkan nomor absen!");return;}
+
+  identitas={nama,absen};
+  indeks=0;totalXP=0;bintang=0;
+  tampil("game");
+  muatSoal();
+}
+
+function muatSoal(){
+  let s=soal[indeks];
+  rekamSelesai=false;
+  jawabanBenar=false;
+
+  document.getElementById("nomor").textContent=`SOAL ${indeks+1}/10`;
+  document.getElementById("xp").textContent=totalXP;
+  document.getElementById("bar").style.width=(indeks/10*100)+"%";
+  document.getElementById("judul").textContent=s.judul;
+  document.getElementById("arab").textContent=s.arab;
+  document.getElementById("arti").textContent=s.arti;
+  document.getElementById("petunjuk").textContent=s.petunjuk;
+
+  document.getElementById("statusRekam").textContent="Rekam suaramu untuk menyelesaikan tantangan.";
+  document.getElementById("rekam").disabled=false;
+  document.getElementById("rekam").textContent="● Rekam Suara";
+  document.getElementById("putar").disabled=true;
+  document.getElementById("ulang").disabled=true;
+  document.getElementById("audio").classList.add("hidden");
+  document.getElementById("audio").removeAttribute("src");
+  document.getElementById("kuis").classList.add("hidden");
+  document.getElementById("feedback").textContent="";
+  document.getElementById("lanjut").disabled=true;
+  document.getElementById("lanjut").textContent=indeks===9?"SELESAI 🏆":"LANJUT →";
+}
+
+function contohSuara(){
+  if(!("speechSynthesis" in window)){
+    alert("Suara contoh tidak didukung browser ini.");
+    return;
+  }
+  speechSynthesis.cancel();
+  let u=new SpeechSynthesisUtterance(soal[indeks].arab);
+  u.lang="ar-SA";
+  u.rate=.8;
+  speechSynthesis.speak(u);
+}
+
+async function mulaiRekam(){
+  try{
+    if(!navigator.mediaDevices?.getUserMedia){
+      throw new Error("Gunakan alamat HTTPS dan browser Chrome.");
+    }
+
+    streamMic=await navigator.mediaDevices.getUserMedia({audio:true});
+    potongan=[];
+
+    let pilihan={};
+    if(MediaRecorder.isTypeSupported("audio/webm;codecs=opus")){
+      pilihan.mimeType="audio/webm;codecs=opus";
+    }
+
+    perekam=new MediaRecorder(streamMic,pilihan);
+
+    perekam.ondataavailable=e=>{
+      if(e.data.size>0)potongan.push(e.data);
+    };
+
+    perekam.onstop=()=>{
+      fileAudio=new Blob(potongan,{type:perekam.mimeType||"audio/webm"});
+      let url=URL.createObjectURL(fileAudio);
+
+      let audio=document.getElementById("audio");
+      audio.src=url;
+      audio.classList.remove("hidden");
+
+      rekamSelesai=true;
+      document.getElementById("statusRekam").textContent="✅ Rekaman berhasil! Dengarkan kembali suaramu.";
+      document.getElementById("rekam").disabled=true;
+      document.getElementById("rekam").textContent="✓ Sudah Direkam";
+      document.getElementById("putar").disabled=false;
+      document.getElementById("ulang").disabled=false;
+      document.getElementById("kuis").classList.remove("hidden");
+
+      if(streamMic){
+        streamMic.getTracks().forEach(t=>t.stop());
+        streamMic=null;
+      }
+      tampilPilihan();
+    };
+
+    perekam.start();
+    document.getElementById("rekam").textContent="■ HENTIKAN REKAMAN";
+    document.getElementById("rekam").onclick=berhentiRekam;
+    document.getElementById("statusRekam").textContent="Sedang merekam... silakan berbicara.";
+  }catch(e){
+    alert(
+      "Mikrofon tidak dapat digunakan: " + e.message +
+      "\nPastikan izin mikrofon aktif dan halaman menggunakan HTTPS."
+    );
+  }
+}
+
+function berhentiRekam(){
+  if(perekam&&perekam.state==="recording"){
+    perekam.stop();
+  }
+  document.getElementById("rekam").onclick=mulaiRekam;
+}
+
+function putarRekaman(){
+  document.getElementById("audio").play();
+}
+
+function rekamUlang(){
+  let audio=document.getElementById("audio");
+  audio.pause();
+  if(audio.src)URL.revokeObjectURL(audio.src);
+  audio.removeAttribute("src");
+  audio.classList.add("hidden");
+
+  rekamSelesai=false;
+  jawabanBenar=false;
+
+  document.getElementById("rekam").disabled=false;
+  document.getElementById("rekam").textContent="● Rekam Suara";
+  document.getElementById("rekam").onclick=mulaiRekam;
+  document.getElementById("putar").disabled=true;
+  document.getElementById("ulang").disabled=true;
+  document.getElementById("kuis").classList.add("hidden");
+  document.getElementById("lanjut").disabled=true;
+  document.getElementById("statusRekam").textContent="Silakan rekam ulang suaramu.";
+}
+
+function tampilPilihan(){
+  let s=soal[indeks];
+  let area=document.getElementById("pilihan");
+  area.innerHTML="";
+
+  s.opsi.forEach((teks,i)=>{
+    let tombol=document.createElement("button");
+    tombol.className="answer";
+    tombol.textContent=teks;
+    tombol.onclick=()=>pilihJawaban(i,tombol);
+    area.appendChild(tombol);
+  });
+}
+
+function pilihJawaban(i,tombol){
+  if(jawabanBenar)return;
+
+  if(i===soal[indeks].benar){
+    jawabanBenar=true;
+    totalXP+=30;
+    bintang+=3;
+
+    tombol.classList.add("correct");
+    document.getElementById("xp").textContent=totalXP;
+    document.getElementById("feedback").textContent="🎉 Benar! +30 XP ⭐⭐⭐";
+    document.getElementById("feedback").className="feedback good";
+
+    [...document.getElementById("pilihan").children].forEach(b=>b.disabled=true);
+    document.getElementById("lanjut").disabled=false;
+  }else{
+    tombol.classList.add("wrong");
+    document.getElementById("feedback").textContent="Kurang tepat, coba lagi!";
+    document.getElementById("feedback").className="feedback bad";
+    setTimeout(()=>tombol.classList.remove("wrong"),600);
+  }
+}
+
+function soalBerikutnya(){
+  if(!rekamSelesai||!jawabanBenar)return;
+
+  totalXP+=70;
+  document.getElementById("xp").textContent=totalXP;
+
+  if(indeks<9){
+    indeks++;
+    muatSoal();
+  }else{
+    selesai();
+  }
+}
+
+function selesai(){
+  document.getElementById("bar").style.width="100%";
+
+  let lencana=totalXP>=900?"👑 Mahkota Kalam":
+              totalXP>=750?"🌟 Bintang Berani":
+              totalXP>=500?"🎖️ Pejuang Kalam":"🌱 Pemula Berani";
+
+  document.getElementById("pesanHasil").textContent=
+    "Selamat "+identitas.nama+"! Kamu menyelesaikan 10 tantangan.";
+
+  document.getElementById("hasilXP").textContent=totalXP;
+  document.getElementById("hasilBintang").textContent=bintang+" ⭐";
+  document.getElementById("hasilLencana").textContent=lencana;
+
+  document.getElementById("statusKirim").textContent="Mengirim hasil...";
+  tampil("hasil");
+
+  google.script.run
+    .withSuccessHandler(res=>{
+      document.getElementById("statusKirim").textContent="✅ "+res.message;
+      document.getElementById("statusKirim").className="feedback good";
+    })
+    .withFailureHandler(err=>{
+      document.getElementById("statusKirim").textContent="Gagal mengirim hasil: "+err.message;
+      document.getElementById("statusKirim").className="feedback bad";
+    })
+    .submitResult({
+      name:identitas.nama,
+      absen:identitas.absen,
+      xp:totalXP,
+      stars:bintang,
+      completed:10
+    });
+}
+
+function lihatPeringkat(){
+  tampil("leader");
+  document.getElementById("daftarPeringkat").textContent="Memuat peringkat...";
+
+  google.script.run
+    .withSuccessHandler(tampilkanPeringkat)
+    .withFailureHandler(err=>{
+      document.getElementById("daftarPeringkat").textContent=
+        "Gagal memuat data: "+err.message;
+    })
+    .getLeaderboard();
+}
+
+function tampilkanPeringkat(data){
+  let area=document.getElementById("daftarPeringkat");
+
+  if(!data.length){
+    area.textContent="Belum ada siswa yang menyelesaikan permainan.";
+    return;
+  }
+
+  let tabel=document.createElement("table");
+  tabel.innerHTML="<thead><tr><th>Rank</th><th>Nama</th><th>XP</th><th>Bintang</th><th>Lencana</th></tr></thead>";
+
+  let tbody=document.createElement("tbody");
+
+  data.forEach((s,i)=>{
+    let tr=document.createElement("tr");
+    let rank=i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1;
+
+    [rank,s.name,s.xp+" XP",s.stars+" ⭐",s.badge].forEach(teks=>{
+      let td=document.createElement("td");
+      td.textContent=teks;
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  tabel.appendChild(tbody);
+  area.innerHTML="";
+  area.appendChild(tabel);
+}
+
+function beranda(){
+  if(streamMic)streamMic.getTracks().forEach(t=>t.stop());
+  speechSynthesis.cancel();
+  tampil("home");
+}
+</script>
+</body>
+</html>
